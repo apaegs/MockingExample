@@ -25,40 +25,32 @@ class BookingSystemTest {
 
     BookingSystem bookingSystem;
 
+    LocalDateTime now;
+    LocalDateTime futureStart;
+    LocalDateTime futureEnd;
+
     @BeforeEach
     void setUp() {
         bookingSystem = new BookingSystem(timeProvider, roomRepository, notificationService);
+        now = LocalDateTime.of(2026, 2, 2, 10, 0);
+        futureStart = now.plusDays(1);
+        futureEnd = futureStart.plusHours(2);
     }
 
     @Test
     void shouldBookRoomWhenRoomIsAvailable() throws NotificationException {
-        LocalDateTime now = LocalDateTime.of(2026,2,2,10,0);
-        LocalDateTime start = now.plusDays(1);
-        LocalDateTime end = start.plusHours(2);
-
         Room room = mock(Room.class);
 
         when(timeProvider.getCurrentTime()).thenReturn(now);
         when(roomRepository.findById("A1")).thenReturn(Optional.of(room));
-        when(room.isAvailable(start,end)).thenReturn(true);
+        when(room.isAvailable(futureStart, futureEnd)).thenReturn(true);
 
-        boolean result = bookingSystem.bookRoom("A1", start, end);
+        boolean result = bookingSystem.bookRoom("A1", futureStart, futureEnd);
 
         assertThat(result).isTrue();
-        verify(room).addBooking(any());
+        verify(room).addBooking(any(Booking.class));
         verify(roomRepository).save(room);
-        verify(notificationService).sendBookingConfirmation(any());
-        
-    }
-
-    @Test
-    void shouldReturnFalseWhenRoomIsNotAvailable() {
-
-    }
-
-    @Test
-    void shouldReturnTrueIfNotificationFails() {
-        
+        verify(notificationService).sendBookingConfirmation(any(Booking.class));
     }
 
 }
