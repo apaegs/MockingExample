@@ -3,13 +3,18 @@ package com.example;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -69,4 +74,25 @@ class BookingSystemTest {
         verify(notificationService, never()).sendBookingConfirmation(any());
     }
 
-}
+    @ParameterizedTest
+    @MethodSource("provideNullArgumentsForBookRoom")
+    void shouldThrowExceptionWhenBookRoomParametersAreNull(String roomId, LocalDateTime start, LocalDateTime end) {
+        assertThatThrownBy(() -> bookingSystem.bookRoom(roomId, start, end))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Bokning kräver giltiga start- och sluttider samt rum-id");
+    }
+
+    static Stream<Arguments> provideNullArgumentsForBookRoom() {
+        LocalDateTime validTime = LocalDateTime.now().plusDays(1);
+        return Stream.of(
+                Arguments.of(null, validTime, validTime.plusHours(1)),
+                Arguments.of("A1", null, validTime.plusHours(1)),
+                Arguments.of("A1", validTime, null)
+        );
+    }
+
+
+    }
+
+
+
