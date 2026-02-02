@@ -163,6 +163,23 @@ class BookingSystemTest {
         assertThat(availableRooms).containsExactly(room1, room3);
     }
 
+    @ParameterizedTest
+    @MethodSource("provideNullArgumentsForGetAvailableRooms")
+    void shouldThrowExceptionWhenGetAvailableRoomsParametersAreNull(LocalDateTime start, LocalDateTime end) {
+        assertThatThrownBy(() -> bookingSystem.getAvailableRooms(start, end))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Måste ange både start- och sluttid");
+    }
+
+    static Stream<Arguments> provideNullArgumentsForGetAvailableRooms() {
+        LocalDateTime validTime = LocalDateTime.now().plusDays(1);
+        return Stream.of(
+                Arguments.of(null, validTime),
+                Arguments.of(validTime, null),
+                Arguments.of(null, null)
+        );
+    }
+
 }
 
 
