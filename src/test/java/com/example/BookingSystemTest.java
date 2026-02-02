@@ -104,12 +104,21 @@ class BookingSystemTest {
 
     @Test
     void shouldThrowExceptionWhenEndTimeIsBeforeStartTime() {
-
         when(timeProvider.getCurrentTime()).thenReturn(now);
 
         assertThatThrownBy(() -> bookingSystem.bookRoom("A1", futureEnd, futureStart))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Sluttid måste vara efter starttid");
+    }
+
+    @Test
+    void shouldThrowExceptionWhenRoomDoesNotExist() {
+        when(timeProvider.getCurrentTime()).thenReturn(now);
+        when(roomRepository.findById("A1")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> bookingSystem.bookRoom("A1", futureStart, futureEnd))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Rummet existerar inte");
     }
 
 
