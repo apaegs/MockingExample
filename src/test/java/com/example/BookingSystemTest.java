@@ -102,6 +102,16 @@ class BookingSystemTest {
                 .hasMessageContaining("Kan inte boka tid i dåtid");
     }
 
+    @Test
+    void shouldThrowExceptionWhenEndTimeIsBeforeStartTime() {
+
+        when(timeProvider.getCurrentTime()).thenReturn(now);
+
+        assertThatThrownBy(() -> bookingSystem.bookRoom("A1", futureEnd, futureStart))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Sluttid måste vara efter starttid");
+    }
+
 
 }
 
