@@ -187,6 +187,18 @@ class BookingSystemTest {
                 .hasMessageContaining("Sluttid måste vara efter starttid");
     }
 
+    @Test
+    void shouldReturnEmptyListWhenNoRoomsIsAvailable() {
+        Room room = mock(Room.class);
+
+        when(room.isAvailable(futureStart, futureEnd)).thenReturn(false);
+        when(roomRepository.findAll()).thenReturn(List.of(room));
+
+        List<Room> availableRooms = bookingSystem.getAvailableRooms(futureStart, futureEnd);
+
+        assertThat(availableRooms).isEmpty();
+    }
+
 }
 
 
