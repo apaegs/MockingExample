@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -41,6 +42,8 @@ class BookingSystemTest {
         futureStart = now.plusDays(1);
         futureEnd = futureStart.plusHours(2);
     }
+
+    // bookRoom() tester
 
     @Test
     void shouldBookRoomWhenRoomIsAvailable() throws NotificationException {
@@ -139,6 +142,25 @@ class BookingSystemTest {
 
         verify(room).addBooking(any(Booking.class));
         verify(roomRepository).save(room);
+    }
+
+    // getAvailableRooms() tester
+
+    @Test
+    void shouldReturnAvailableRooms() {
+        Room room1 = mock(Room.class);
+        Room room2 = mock(Room.class);
+        Room room3 = mock(Room.class);
+
+        when(room1.isAvailable(futureStart, futureEnd)).thenReturn(true);
+        when(room2.isAvailable(futureStart, futureEnd)).thenReturn(false);
+        when(room3.isAvailable(futureStart, futureEnd)).thenReturn(true);
+
+        when(roomRepository.findAll()).thenReturn(List.of(room1, room2, room3));
+
+        List<Room> availableRooms = bookingSystem.getAvailableRooms(futureStart, futureEnd);
+
+        assertThat(availableRooms).containsExactly(room1, room3);
     }
 
 }
