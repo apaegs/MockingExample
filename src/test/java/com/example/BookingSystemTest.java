@@ -179,6 +179,13 @@ class BookingSystemTest {
                 Arguments.of(null, null)
         );
     }
+    
+    @Test
+    void shouldThrowExceptionWhenGetAvailableRoomsEndTimeIsBeforeStartTime() {
+        assertThatThrownBy(() -> bookingSystem.getAvailableRooms(futureEnd, futureStart))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Sluttid måste vara efter starttid");
+    }
 
 }
 
