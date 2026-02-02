@@ -91,8 +91,19 @@ class BookingSystemTest {
         );
     }
 
+    @Test
+    void shouldThrowExceptionWhenBookingInThePast() {
+        LocalDateTime pastTime = now.minusDays(1);
 
+        when(timeProvider.getCurrentTime()).thenReturn(now);
+
+        assertThatThrownBy(() -> bookingSystem.bookRoom("A1", pastTime, pastTime.plusHours(1)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Kan inte boka tid i dåtid");
     }
+
+
+}
 
 
 
