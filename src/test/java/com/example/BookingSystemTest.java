@@ -121,6 +121,25 @@ class BookingSystemTest {
                 .hasMessageContaining("Rummet existerar inte");
     }
 
+    @Test
+    void shouldBookRoomEvenWhenNotificationFails() throws NotificationException {
+        // ARRANGE
+        Room room = mock(Room.class);
+
+        when(timeProvider.getCurrentTime()).thenReturn(now);
+        when(roomRepository.findById("A1")).thenReturn(Optional.of(room));
+        when(room.isAvailable(futureStart, futureEnd)).thenReturn(true);
+
+        doThrow(new NotificationException("Notification failed"))
+                .when(notificationService).sendBookingConfirmation(any(Booking.class));
+
+        boolean result = bookingSystem.bookRoom("A1", futureStart, futureEnd);
+
+        assertThat(result).isTrue();
+
+        verify(room).addBooking(any(Booking.class));
+        verify(roomRepository).save(room);
+    }
 
 }
 
