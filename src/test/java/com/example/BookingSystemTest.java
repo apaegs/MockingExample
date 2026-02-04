@@ -256,6 +256,25 @@ class BookingSystemTest {
                 .hasMessageContaining("Kan inte avboka påbörjad eller avslutad bokning");
     }
 
+    @Test
+    void shouldCancelBookingEvenWhenNotificationFails() throws NotificationException {
+        Room room = mock(Room.class);
+        Booking booking = new Booking("booking", "A1", futureStart, futureEnd);
+
+        when(timeProvider.getCurrentTime()).thenReturn(now);
+        when(roomRepository.findAll()).thenReturn(List.of(room));
+        when(room.hasBooking("booking")).thenReturn(true);
+        when(room.getBooking("booking")).thenReturn(booking);
+        doThrow(new NotificationException("Notification failed"))
+                .when(notificationService).sendCancellationConfirmation(booking);
+
+        boolean result = bookingSystem.cancelBooking("booking");
+
+        assertThat(result).isTrue();
+        verify(room).removeBooking("booking");
+        verify(roomRepository).save(room);
+    }
+
 }
 
 
