@@ -219,6 +219,13 @@ class BookingSystemTest {
         verify(notificationService).sendCancellationConfirmation(booking);
     }
 
+    @Test
+    void shouldThrowExceptionWhenCancelBookingWithNullId() {
+        assertThatThrownBy(() -> bookingSystem.cancelBooking(null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Boknings-id kan inte vara null");
+    }
+
 }
 
 
