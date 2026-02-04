@@ -240,6 +240,22 @@ class BookingSystemTest {
         verify(roomRepository, never()).save(any());
     }
 
+    @Test
+    void shouldThrowExceptionWhenCancellingStartedBooking() {
+        Room room = mock(Room.class);
+        LocalDateTime pastStart = now.minusHours(1);
+        Booking booking = new Booking("booking", "A1", pastStart, now.plusHours(1));
+
+        when(timeProvider.getCurrentTime()).thenReturn(now);
+        when(roomRepository.findAll()).thenReturn(List.of(room));
+        when(room.hasBooking("booking")).thenReturn(true);
+        when(room.getBooking("booking")).thenReturn(booking);
+
+        assertThatThrownBy(() -> bookingSystem.cancelBooking("booking"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Kan inte avboka påbörjad eller avslutad bokning");
+    }
+
 }
 
 
