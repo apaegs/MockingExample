@@ -226,6 +226,20 @@ class BookingSystemTest {
                 .hasMessageContaining("Boknings-id kan inte vara null");
     }
 
+    @Test
+    void shouldReturnFalseWhenBookingNotFound() {
+        Room room = mock(Room.class);
+
+        when(roomRepository.findAll()).thenReturn(List.of(room));
+        when(room.hasBooking("nonexistent")).thenReturn(false);
+
+        boolean result = bookingSystem.cancelBooking("nonexistent");
+
+        assertThat(result).isFalse();
+        verify(room, never()).removeBooking(any());
+        verify(roomRepository, never()).save(any());
+    }
+
 }
 
 
