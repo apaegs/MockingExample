@@ -49,11 +49,12 @@
                     </dependency>
                 </dependencies>
                 <configuration>
+                    <!-- Kör ALLA klasser i com.example -->
                     <targetClasses>
-                        <param>com.example.BookingSystem</param>
+                        <param>com.example.*</param>
                     </targetClasses>
                     <targetTests>
-                        <param>com.example.BookingSystemTest*</param>
+                        <param>com.example.*</param>
                     </targetTests>
                     <outputFormats>
                         <outputFormat>HTML</outputFormat>
