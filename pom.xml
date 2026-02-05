@@ -48,6 +48,18 @@
                         <version>1.2.2</version>
                     </dependency>
                 </dependencies>
+                <configuration>
+                    <targetClasses>
+                        <param>com.example.BookingSystem</param>
+                    </targetClasses>
+                    <targetTests>
+                        <param>com.example.BookingSystemTest*</param>
+                    </targetTests>
+                    <outputFormats>
+                        <outputFormat>HTML</outputFormat>
+                    </outputFormats>
+                    <timestampedReports>false</timestampedReports>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -75,7 +87,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.12</version>
+                <version>0.8.14</version>
                 <configuration>
                     <skip>false</skip>
                 </configuration>
