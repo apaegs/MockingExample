@@ -43,4 +43,20 @@ class ShoppingCartTest {
         assertThat(cart.getItems()).isEmpty();
     }
 
+    @Test
+    void shouldCalculateTotalPrice() {
+        // ARRANGE
+        Item item1 = new Item("T-Shirt", BigDecimal.valueOf(150), 1);
+        Item item2 = new Item("Sweater", BigDecimal.valueOf(200), 2);
+        cart.addItem(item1);
+        cart.addItem(item2);
+
+        // ACT
+        BigDecimal total = cart.getTotalPrice();
+
+        // ASSERT
+        assertThat(total).isEqualTo(BigDecimal.valueOf(550));
+
+    }
+
 }
