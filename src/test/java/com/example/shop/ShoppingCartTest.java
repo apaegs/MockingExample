@@ -144,4 +144,15 @@ class ShoppingCartTest {
 
     }
 
+    @Test
+    void shouldThrowExceptionWhenAddingItemWithZeroQuantity() {
+        // ARRANGE
+        Item item = new Item("T-Shirt", BigDecimal.valueOf(150), 0);
+
+        // ACT & ASSERT
+        assertThatThrownBy(() -> cart.addItem(item))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Kvantitet måste vara positiv");
+    }
+
 }
