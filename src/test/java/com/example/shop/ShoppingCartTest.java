@@ -88,4 +88,17 @@ class ShoppingCartTest {
         assertThat(cart.getTotalPrice()).isEqualByComparingTo(BigDecimal.valueOf(450));
     }
 
+    // Edge Cases
+
+    @Test
+    void shouldReturnZeroForEmptyCart() {
+        // ARRANGE
+
+        // ACT
+        BigDecimal total = cart.getTotalPrice();
+
+        // ASSERT
+        assertThat(total).isEqualByComparingTo(BigDecimal.ZERO);
+    }
+
 }
