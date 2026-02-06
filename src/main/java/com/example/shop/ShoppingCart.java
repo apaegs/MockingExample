@@ -40,6 +40,9 @@ public class ShoppingCart {
         if (percentage.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Rabatt kan inte vara negativ");
         }
+        if (percentage.compareTo(BigDecimal.valueOf(100)) > 0) {
+            throw new IllegalArgumentException("Rabatt kan inte vara över 100%");
+        }
         this.discountPercentage = percentage;
     }
 

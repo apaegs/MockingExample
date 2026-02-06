@@ -190,4 +190,15 @@ class ShoppingCartTest {
                 .hasMessageContaining("Rabatt kan inte vara negativ");
     }
 
+    @Test
+    void shouldThrowExceptionWhenApplyingDiscountOver100Percent() {
+        // ARRANGE
+        BigDecimal over100PercentDiscount = BigDecimal.valueOf(101);
+
+        // ACT & ASSERT
+        assertThatThrownBy(() -> cart.applyDiscount(over100PercentDiscount))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Rabatt kan inte vara över 100%");
+    }
+
 }
