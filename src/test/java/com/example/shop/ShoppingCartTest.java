@@ -55,8 +55,23 @@ class ShoppingCartTest {
         BigDecimal total = cart.getTotalPrice();
 
         // ASSERT
-        assertThat(total).isEqualTo(BigDecimal.valueOf(550));
+        assertThat(total).isEqualByComparingTo(BigDecimal.valueOf(550));
+    }
 
+    @Test
+    void shouldApplyDiscountToTotalPrice() {
+        // ARRANGE
+        Item item1 = new Item("T-Shirt", BigDecimal.valueOf(150), 1);
+        Item item2 = new Item("Sweater", BigDecimal.valueOf(200), 1);
+        cart.addItem(item1);
+        cart.addItem(item2);
+
+        // ACT
+        cart.applyDiscount(BigDecimal.valueOf(10)); // 10% discount
+        BigDecimal total = cart.getTotalPrice();
+
+        // ASSERT
+        assertThat(total).isEqualByComparingTo(BigDecimal.valueOf(315));
     }
 
 }
