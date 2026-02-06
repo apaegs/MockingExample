@@ -101,4 +101,19 @@ class ShoppingCartTest {
         assertThat(total).isEqualByComparingTo(BigDecimal.ZERO);
     }
 
+    @Test
+    void shouldHandleRemovingNonExistentItem() {
+        // ARRANGE
+        Item existingItem = new Item("T-Shirt", BigDecimal.valueOf(150), 1);
+        Item nonExistentItem = new Item("Jeans", BigDecimal.valueOf(200), 1);
+        cart.addItem(existingItem);
+
+        // ACT
+        cart.removeItem(nonExistentItem);
+
+        // ASSERT
+        assertThat(cart.getItems()).hasSize(1);
+        assertThat(cart.getItems()).contains(existingItem);
+    }
+
 }
