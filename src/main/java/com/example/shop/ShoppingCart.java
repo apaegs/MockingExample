@@ -22,6 +22,9 @@ public class ShoppingCart {
     }
 
     public void updateQuantity(Item item, int newQuantity) {
+        if (newQuantity <= 0) {
+            throw new IllegalArgumentException("Kvantitet måste vara positiv");
+        }
         items.replace(item, newQuantity);
     }
 

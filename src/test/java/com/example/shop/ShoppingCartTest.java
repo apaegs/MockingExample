@@ -155,4 +155,16 @@ class ShoppingCartTest {
                 .hasMessageContaining("Kvantitet måste vara positiv");
     }
 
+    @Test
+    void shouldThrowExceptionWhenUpdatingToZeroQuantity() {
+        // ARRANGE
+        Item item = new Item("T-Shirt", BigDecimal.valueOf(150), 1);
+        cart.addItem(item);
+
+        // ACT & ASSERT
+        assertThatThrownBy(() -> cart.updateQuantity(item, 0))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Kvantitet måste vara positiv");
+    }
+
 }
