@@ -74,4 +74,18 @@ class ShoppingCartTest {
         assertThat(total).isEqualByComparingTo(BigDecimal.valueOf(315));
     }
 
+    @Test
+    void shouldUpdateItemQuantity() {
+        // ARRANGE
+        Item item = new Item("T-Shirt", BigDecimal.valueOf(150), 1);
+        cart.addItem(item);
+
+        // ACT
+        cart.updateQuantity(item, 3);
+
+        // ASSERT
+        assertThat(cart.getItems()).hasSize(1);
+        assertThat(cart.getTotalPrice()).isEqualByComparingTo(BigDecimal.valueOf(450));
+    }
+
 }

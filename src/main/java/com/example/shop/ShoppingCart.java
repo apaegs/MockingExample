@@ -2,29 +2,42 @@ package com.example.shop;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ShoppingCart {
-
-    private List<Item> items = new ArrayList<>();
-    private BigDecimal discountPercentage;
+    private Map<Item, Integer> items = new HashMap<>();
+    private BigDecimal discountPercentage = BigDecimal.ZERO;
 
     public void addItem(Item item) {
-        items.add(item);
+        items.merge(item, item.getQuantity(), Integer::sum);
     }
 
     public void removeItem(Item item) {
         items.remove(item);
     }
 
+    public void updateQuantity(Item item, int newQuantity) {
+        items.replace(item, newQuantity);
+    }
+
     public List<Item> getItems() {
-        return items;
+        return items.entrySet().stream()
+                .map(entry -> new Item(entry.getKey().getItemName(),
+                        entry.getKey().getPrice(),
+                        entry.getValue()))
+                .toList();
+    }
+
+    public void applyDiscount(BigDecimal percentage) {
+        this.discountPercentage = percentage;
     }
 
     public BigDecimal getTotalPrice() {
-        BigDecimal subtotal = items.stream()
-                .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+        BigDecimal subtotal = items.entrySet().stream()
+                .map(entry -> entry.getKey().getPrice()
+                        .multiply(BigDecimal.valueOf(entry.getValue())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         if (discountPercentage.compareTo(BigDecimal.ZERO) > 0) {
@@ -35,9 +48,4 @@ public class ShoppingCart {
 
         return subtotal;
     }
-
-    public void applyDiscount(BigDecimal precentage) {
-        this.discountPercentage = precentage;
-    }
 }
-
