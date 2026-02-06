@@ -201,4 +201,11 @@ class ShoppingCartTest {
                 .hasMessageContaining("Rabatt kan inte vara över 100%");
     }
 
+    @Test
+    void shouldAllowExactly100PercentDiscount() {
+        cart.addItem(new Item("T-Shirt", BigDecimal.valueOf(100), 1));
+        cart.applyDiscount(BigDecimal.valueOf(100));
+        assertThat(cart.getTotalPrice()).isEqualByComparingTo(BigDecimal.ZERO);
+    }
+
 }
