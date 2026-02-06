@@ -11,6 +11,9 @@ public class ShoppingCart {
     private BigDecimal discountPercentage = BigDecimal.ZERO;
 
     public void addItem(Item item) {
+        if (item.getQuantity() <= 0) {
+            throw new IllegalArgumentException("Kvantitet måste vara positiv");
+        }
         items.merge(item, item.getQuantity(), Integer::sum);
     }
 

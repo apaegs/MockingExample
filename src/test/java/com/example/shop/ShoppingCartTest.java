@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
 class ShoppingCartTest {
@@ -129,6 +130,18 @@ class ShoppingCartTest {
         // ASSERT
         assertThat(cart.getItems()).hasSize(1);
         assertThat(cart.getItems().getFirst().getQuantity()).isEqualTo(5);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenAddingItemWithNegativeQuantity() {
+        // ARRANGE
+        Item item = new Item("T-Shirt", BigDecimal.valueOf(150), -1);
+
+        // ACT & ASSERT
+        assertThatThrownBy(() -> cart.addItem(item))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Kvantitet måste vara positiv");
+
     }
 
 }
