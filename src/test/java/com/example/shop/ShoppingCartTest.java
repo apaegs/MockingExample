@@ -116,4 +116,19 @@ class ShoppingCartTest {
         assertThat(cart.getItems()).contains(existingItem);
     }
 
+    @Test
+    void shouldMergeQuantitiesWhenAddingSameItemTwice() {
+        // ARRANGE
+        Item item1 = new Item("T-Shirt", BigDecimal.valueOf(150), 2);
+        Item item2 = new Item("T-Shirt", BigDecimal.valueOf(150), 3);
+
+        // ACT
+        cart.addItem(item1);
+        cart.addItem(item2);
+
+        // ASSERT
+        assertThat(cart.getItems()).hasSize(1);
+        assertThat(cart.getItems().getFirst().getQuantity()).isEqualTo(5);
+    }
+
 }
