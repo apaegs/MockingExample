@@ -29,5 +29,18 @@ class ShoppingCartTest {
         assertThat(cart.getItems()).hasSize(1);
         assertThat(cart.getItems()).contains(item);
     }
-    
+
+    @Test
+    void shouldRemoveItemFromCart() {
+        // ARRANGE
+        Item item = new Item("T-Shirt", BigDecimal.valueOf(150), 1);
+        cart.addItem(item);
+
+        // ACT
+        cart.removeItem(item);
+
+        // ASSERT
+        assertThat(cart.getItems()).isEmpty();
+    }
+
 }
