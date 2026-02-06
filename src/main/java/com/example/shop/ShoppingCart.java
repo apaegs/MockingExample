@@ -37,6 +37,9 @@ public class ShoppingCart {
     }
 
     public void applyDiscount(BigDecimal percentage) {
+        if (percentage.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Rabatt kan inte vara negativ");
+        }
         this.discountPercentage = percentage;
     }
 

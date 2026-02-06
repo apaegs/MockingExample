@@ -179,4 +179,15 @@ class ShoppingCartTest {
                 .hasMessageContaining("Kvantitet måste vara positiv");
     }
 
+    @Test
+    void shouldThrowExceptionWhenApplyingNegativeDiscount() {
+        // ARRANGE
+        BigDecimal negativeDiscount = BigDecimal.valueOf(-10);
+
+        // ACT & ASSERT
+        assertThatThrownBy(() -> cart.applyDiscount(negativeDiscount))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Rabatt kan inte vara negativ");
+    }
+
 }
