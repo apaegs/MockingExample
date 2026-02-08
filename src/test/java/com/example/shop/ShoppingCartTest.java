@@ -208,4 +208,12 @@ class ShoppingCartTest {
         assertThat(cart.getTotalPrice()).isEqualByComparingTo(BigDecimal.ZERO);
     }
 
+    @Test
+    void shouldThrowExceptionWhenApplyingZeroDiscount() {
+        // ACT & ASSERT
+        assertThatThrownBy(() -> cart.applyDiscount(BigDecimal.ZERO))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Rabatt kan inte vara negativ");
+    }
+
 }
