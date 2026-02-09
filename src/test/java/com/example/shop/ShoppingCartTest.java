@@ -1,13 +1,13 @@
 package com.example.shop;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 
 class ShoppingCartTest {
 
@@ -18,202 +18,213 @@ class ShoppingCartTest {
         cart = new ShoppingCart();
     }
 
-    @Test
-    void shouldAddItemToCart() {
-        // ARRANGE
-        Item item = new Item("T-Shirt", BigDecimal.valueOf(150), 1);
+    @Nested
+    class BasicOperations {
 
-        // ACT
-        cart.addItem(item);
+        @Test
+        void shouldAddItemToCart() {
+            // ARRANGE
+            Item item = new Item("T-Shirt", BigDecimal.valueOf(150), 1);
 
-        // ASSERT
-        assertThat(cart.getItems()).hasSize(1);
-        assertThat(cart.getItems()).contains(item);
+            // ACT
+            cart.addItem(item);
+
+            // ASSERT
+            assertThat(cart.getItems()).hasSize(1);
+            assertThat(cart.getItems()).contains(item);
+        }
+
+        @Test
+        void shouldRemoveItemFromCart() {
+            // ARRANGE
+            Item item = new Item("T-Shirt", BigDecimal.valueOf(150), 1);
+            cart.addItem(item);
+
+            // ACT
+            cart.removeItem(item);
+
+            // ASSERT
+            assertThat(cart.getItems()).isEmpty();
+        }
+
+        @Test
+        void shouldUpdateItemQuantity() {
+            // ARRANGE
+            Item item = new Item("T-Shirt", BigDecimal.valueOf(150), 1);
+            cart.addItem(item);
+
+            // ACT
+            cart.updateQuantity(item, 3);
+
+            // ASSERT
+            assertThat(cart.getItems()).hasSize(1);
+            assertThat(cart.getTotalPrice()).isEqualByComparingTo(BigDecimal.valueOf(450));
+        }
+
+        @Test
+        void shouldMergeQuantitiesWhenAddingSameItemTwice() {
+            // ARRANGE
+            Item item1 = new Item("T-Shirt", BigDecimal.valueOf(150), 2);
+            Item item2 = new Item("T-Shirt", BigDecimal.valueOf(150), 3);
+
+            // ACT
+            cart.addItem(item1);
+            cart.addItem(item2);
+
+            // ASSERT
+            assertThat(cart.getItems()).hasSize(1);
+            assertThat(cart.getItems().getFirst().getQuantity()).isEqualTo(5);
+        }
+
+        @Test
+        void shouldHandleRemovingNonExistentItem() {
+            // ARRANGE
+            Item existingItem = new Item("T-Shirt", BigDecimal.valueOf(150), 1);
+            Item nonExistentItem = new Item("Jeans", BigDecimal.valueOf(200), 1);
+            cart.addItem(existingItem);
+
+            // ACT
+            cart.removeItem(nonExistentItem);
+
+            // ASSERT
+            assertThat(cart.getItems()).hasSize(1);
+            assertThat(cart.getItems()).contains(existingItem);
+        }
     }
 
-    @Test
-    void shouldRemoveItemFromCart() {
-        // ARRANGE
-        Item item = new Item("T-Shirt", BigDecimal.valueOf(150), 1);
-        cart.addItem(item);
+    @Nested
+    class Calculations {
 
-        // ACT
-        cart.removeItem(item);
+        @Test
+        void shouldCalculateTotalPrice() {
+            // ARRANGE
+            Item item1 = new Item("T-Shirt", BigDecimal.valueOf(150), 1);
+            Item item2 = new Item("Sweater", BigDecimal.valueOf(200), 2);
+            cart.addItem(item1);
+            cart.addItem(item2);
 
-        // ASSERT
-        assertThat(cart.getItems()).isEmpty();
+            // ACT
+            BigDecimal total = cart.getTotalPrice();
+
+            // ASSERT
+            assertThat(total).isEqualByComparingTo(BigDecimal.valueOf(550));
+        }
+
+        @Test
+        void shouldReturnZeroForEmptyCart() {
+            // ARRANGE
+
+            // ACT
+            BigDecimal total = cart.getTotalPrice();
+
+            // ASSERT
+            assertThat(total).isEqualByComparingTo(BigDecimal.ZERO);
+        }
+
+        @Test
+        void shouldApplyDiscountToTotalPrice() {
+            // ARRANGE
+            Item item1 = new Item("T-Shirt", BigDecimal.valueOf(150), 1);
+            Item item2 = new Item("Sweater", BigDecimal.valueOf(200), 1);
+            cart.addItem(item1);
+            cart.addItem(item2);
+
+            // ACT
+            cart.applyDiscount(BigDecimal.valueOf(10)); // 10% discount
+            BigDecimal total = cart.getTotalPrice();
+
+            // ASSERT
+            assertThat(total).isEqualByComparingTo(BigDecimal.valueOf(315));
+        }
+
+        @Test
+        void shouldAllowExactly100PercentDiscount() {
+            cart.addItem(new Item("T-Shirt", BigDecimal.valueOf(100), 1));
+            cart.applyDiscount(BigDecimal.valueOf(100));
+            assertThat(cart.getTotalPrice()).isEqualByComparingTo(BigDecimal.ZERO);
+        }
     }
 
-    @Test
-    void shouldCalculateTotalPrice() {
-        // ARRANGE
-        Item item1 = new Item("T-Shirt", BigDecimal.valueOf(150), 1);
-        Item item2 = new Item("Sweater", BigDecimal.valueOf(200), 2);
-        cart.addItem(item1);
-        cart.addItem(item2);
+    @Nested
+    class Validation {
 
-        // ACT
-        BigDecimal total = cart.getTotalPrice();
+        @Test
+        void shouldThrowExceptionWhenAddingItemWithNegativeQuantity() {
+            // ARRANGE
+            Item item = new Item("T-Shirt", BigDecimal.valueOf(150), -1);
 
-        // ASSERT
-        assertThat(total).isEqualByComparingTo(BigDecimal.valueOf(550));
+            // ACT & ASSERT
+            assertThatThrownBy(() -> cart.addItem(item))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Kvantitet måste vara positiv");
+        }
+
+        @Test
+        void shouldThrowExceptionWhenAddingItemWithZeroQuantity() {
+            // ARRANGE
+            Item item = new Item("T-Shirt", BigDecimal.valueOf(150), 0);
+
+            // ACT & ASSERT
+            assertThatThrownBy(() -> cart.addItem(item))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Kvantitet måste vara positiv");
+        }
+
+        @Test
+        void shouldThrowExceptionWhenUpdatingToZeroQuantity() {
+            // ARRANGE
+            Item item = new Item("T-Shirt", BigDecimal.valueOf(150), 1);
+            cart.addItem(item);
+
+            // ACT & ASSERT
+            assertThatThrownBy(() -> cart.updateQuantity(item, 0))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Kvantitet måste vara positiv");
+        }
+
+        @Test
+        void shouldThrowExceptionWhenUpdatingToNegativeQuantity() {
+            // ARRANGE
+            Item item = new Item("T-Shirt", BigDecimal.valueOf(150), 1);
+            cart.addItem(item);
+
+            // ACT & ASSERT
+            assertThatThrownBy(() -> cart.updateQuantity(item, -5))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Kvantitet måste vara positiv");
+        }
+
+        @Test
+        void shouldThrowExceptionWhenApplyingNegativeDiscount() {
+            // ARRANGE
+            BigDecimal negativeDiscount = BigDecimal.valueOf(-10);
+
+            // ACT & ASSERT
+            assertThatThrownBy(() -> cart.applyDiscount(negativeDiscount))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Rabatt kan inte vara negativ");
+        }
+
+        @Test
+        void shouldThrowExceptionWhenApplyingZeroDiscount() {
+            // ARRANGE
+            BigDecimal zeroDiscount = BigDecimal.ZERO;
+
+            // ACT & ASSERT
+            assertThatThrownBy(() -> cart.applyDiscount(zeroDiscount))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Rabatt kan inte vara negativ");
+        }
+
+        @Test
+        void shouldThrowExceptionWhenApplyingDiscountOver100Percent() {
+            // ARRANGE
+            BigDecimal over100PercentDiscount = BigDecimal.valueOf(101);
+
+            // ACT & ASSERT
+            assertThatThrownBy(() -> cart.applyDiscount(over100PercentDiscount))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Rabatt kan inte vara över 100%");
+        }
     }
-
-    @Test
-    void shouldApplyDiscountToTotalPrice() {
-        // ARRANGE
-        Item item1 = new Item("T-Shirt", BigDecimal.valueOf(150), 1);
-        Item item2 = new Item("Sweater", BigDecimal.valueOf(200), 1);
-        cart.addItem(item1);
-        cart.addItem(item2);
-
-        // ACT
-        cart.applyDiscount(BigDecimal.valueOf(10)); // 10% discount
-        BigDecimal total = cart.getTotalPrice();
-
-        // ASSERT
-        assertThat(total).isEqualByComparingTo(BigDecimal.valueOf(315));
-    }
-
-    @Test
-    void shouldUpdateItemQuantity() {
-        // ARRANGE
-        Item item = new Item("T-Shirt", BigDecimal.valueOf(150), 1);
-        cart.addItem(item);
-
-        // ACT
-        cart.updateQuantity(item, 3);
-
-        // ASSERT
-        assertThat(cart.getItems()).hasSize(1);
-        assertThat(cart.getTotalPrice()).isEqualByComparingTo(BigDecimal.valueOf(450));
-    }
-
-    // Edge Cases
-
-    @Test
-    void shouldReturnZeroForEmptyCart() {
-        // ARRANGE
-
-        // ACT
-        BigDecimal total = cart.getTotalPrice();
-
-        // ASSERT
-        assertThat(total).isEqualByComparingTo(BigDecimal.ZERO);
-    }
-
-    @Test
-    void shouldHandleRemovingNonExistentItem() {
-        // ARRANGE
-        Item existingItem = new Item("T-Shirt", BigDecimal.valueOf(150), 1);
-        Item nonExistentItem = new Item("Jeans", BigDecimal.valueOf(200), 1);
-        cart.addItem(existingItem);
-
-        // ACT
-        cart.removeItem(nonExistentItem);
-
-        // ASSERT
-        assertThat(cart.getItems()).hasSize(1);
-        assertThat(cart.getItems()).contains(existingItem);
-    }
-
-    @Test
-    void shouldMergeQuantitiesWhenAddingSameItemTwice() {
-        // ARRANGE
-        Item item1 = new Item("T-Shirt", BigDecimal.valueOf(150), 2);
-        Item item2 = new Item("T-Shirt", BigDecimal.valueOf(150), 3);
-
-        // ACT
-        cart.addItem(item1);
-        cart.addItem(item2);
-
-        // ASSERT
-        assertThat(cart.getItems()).hasSize(1);
-        assertThat(cart.getItems().getFirst().getQuantity()).isEqualTo(5);
-    }
-
-    @Test
-    void shouldThrowExceptionWhenAddingItemWithNegativeQuantity() {
-        // ARRANGE
-        Item item = new Item("T-Shirt", BigDecimal.valueOf(150), -1);
-
-        // ACT & ASSERT
-        assertThatThrownBy(() -> cart.addItem(item))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Kvantitet måste vara positiv");
-
-    }
-
-    @Test
-    void shouldThrowExceptionWhenAddingItemWithZeroQuantity() {
-        // ARRANGE
-        Item item = new Item("T-Shirt", BigDecimal.valueOf(150), 0);
-
-        // ACT & ASSERT
-        assertThatThrownBy(() -> cart.addItem(item))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Kvantitet måste vara positiv");
-    }
-
-    @Test
-    void shouldThrowExceptionWhenUpdatingToZeroQuantity() {
-        // ARRANGE
-        Item item = new Item("T-Shirt", BigDecimal.valueOf(150), 1);
-        cart.addItem(item);
-
-        // ACT & ASSERT
-        assertThatThrownBy(() -> cart.updateQuantity(item, 0))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Kvantitet måste vara positiv");
-    }
-
-    @Test
-    void shouldThrowExceptionWhenUpdatingToNegativeQuantity() {
-        // ARRANGE
-        Item item = new Item("T-Shirt", BigDecimal.valueOf(150), 1);
-        cart.addItem(item);
-
-        // ACT & ASSERT
-        assertThatThrownBy(() -> cart.updateQuantity(item, -5))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Kvantitet måste vara positiv");
-    }
-
-    @Test
-    void shouldThrowExceptionWhenApplyingNegativeDiscount() {
-        // ARRANGE
-        BigDecimal negativeDiscount = BigDecimal.valueOf(-10);
-
-        // ACT & ASSERT
-        assertThatThrownBy(() -> cart.applyDiscount(negativeDiscount))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Rabatt kan inte vara negativ");
-    }
-
-    @Test
-    void shouldThrowExceptionWhenApplyingDiscountOver100Percent() {
-        // ARRANGE
-        BigDecimal over100PercentDiscount = BigDecimal.valueOf(101);
-
-        // ACT & ASSERT
-        assertThatThrownBy(() -> cart.applyDiscount(over100PercentDiscount))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Rabatt kan inte vara över 100%");
-    }
-
-    @Test
-    void shouldAllowExactly100PercentDiscount() {
-        cart.addItem(new Item("T-Shirt", BigDecimal.valueOf(100), 1));
-        cart.applyDiscount(BigDecimal.valueOf(100));
-        assertThat(cart.getTotalPrice()).isEqualByComparingTo(BigDecimal.ZERO);
-    }
-
-    @Test
-    void shouldThrowExceptionWhenApplyingZeroDiscount() {
-        // ACT & ASSERT
-        assertThatThrownBy(() -> cart.applyDiscount(BigDecimal.ZERO))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Rabatt kan inte vara negativ");
-    }
-
 }
