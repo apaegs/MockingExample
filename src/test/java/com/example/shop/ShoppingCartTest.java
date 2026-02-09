@@ -1,7 +1,6 @@
 package com.example.shop;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -149,7 +148,6 @@ class ShoppingCartTest {
     }
 
     @Nested
-    @DisplayName("Validation and Error Handling")
     class Validation {
 
         @ParameterizedTest
@@ -177,7 +175,7 @@ class ShoppingCartTest {
         @ParameterizedTest
         @CsvSource({
                 "-10, Rabatt kan inte vara negativ",
-                "0,   Rabatt kan inte vara negativ",
+                "0,   Rabatt måste vara större än 0",
                 "101, Rabatt kan inte vara över 100%"
         })
         void shouldThrowExceptionForInvalidDiscounts(int discount, String expectedMessage) {

@@ -25,6 +25,9 @@ public class ShoppingCart {
         if (newQuantity <= 0) {
             throw new IllegalArgumentException("Kvantitet måste vara positiv");
         }
+        if (!items.containsKey(item)) {
+            throw new IllegalArgumentException("Produkten finns inte i varukorgen");
+        }
         items.replace(item, newQuantity);
     }
 
@@ -37,8 +40,11 @@ public class ShoppingCart {
     }
 
     public void applyDiscount(BigDecimal percentage) {
-        if (percentage.compareTo(BigDecimal.ZERO) <= 0) {
+        if (percentage.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("Rabatt kan inte vara negativ");
+        }
+        if (percentage.compareTo(BigDecimal.ZERO) == 0) {
+            throw new IllegalArgumentException("Rabatt måste vara större än 0");
         }
         if (percentage.compareTo(BigDecimal.valueOf(100)) > 0) {
             throw new IllegalArgumentException("Rabatt kan inte vara över 100%");
