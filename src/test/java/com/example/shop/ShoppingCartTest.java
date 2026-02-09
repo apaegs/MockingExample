@@ -1,8 +1,11 @@
 package com.example.shop;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.math.BigDecimal;
 
@@ -146,85 +149,45 @@ class ShoppingCartTest {
     }
 
     @Nested
+    @DisplayName("Validation and Error Handling")
     class Validation {
 
-        @Test
-        void shouldThrowExceptionWhenAddingItemWithNegativeQuantity() {
+        @ParameterizedTest
+        @CsvSource({
+                "-1, Kvantitet måste vara positiv",
+                "0,  Kvantitet måste vara positiv"
+        })
+        void shouldThrowExceptionForInvalidQuantities(int quantity, String expectedMessage) {
             // ARRANGE
-            Item item = new Item("T-Shirt", BigDecimal.valueOf(150), -1);
+            Item item = new Item("T-Shirt", BigDecimal.valueOf(150), quantity);
 
             // ACT & ASSERT
             assertThatThrownBy(() -> cart.addItem(item))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("Kvantitet måste vara positiv");
+                    .hasMessageContaining(expectedMessage);
+
+            // test updateQuantity
+            Item validItem = new Item("T-Shirt", BigDecimal.valueOf(150), 1);
+            cart.addItem(validItem);
+            assertThatThrownBy(() -> cart.updateQuantity(validItem, quantity))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining(expectedMessage);
         }
 
-        @Test
-        void shouldThrowExceptionWhenAddingItemWithZeroQuantity() {
+        @ParameterizedTest
+        @CsvSource({
+                "-10, Rabatt kan inte vara negativ",
+                "0,   Rabatt kan inte vara negativ",
+                "101, Rabatt kan inte vara över 100%"
+        })
+        void shouldThrowExceptionForInvalidDiscounts(int discount, String expectedMessage) {
             // ARRANGE
-            Item item = new Item("T-Shirt", BigDecimal.valueOf(150), 0);
+            BigDecimal discountValue = BigDecimal.valueOf(discount);
 
             // ACT & ASSERT
-            assertThatThrownBy(() -> cart.addItem(item))
+            assertThatThrownBy(() -> cart.applyDiscount(discountValue))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("Kvantitet måste vara positiv");
-        }
-
-        @Test
-        void shouldThrowExceptionWhenUpdatingToZeroQuantity() {
-            // ARRANGE
-            Item item = new Item("T-Shirt", BigDecimal.valueOf(150), 1);
-            cart.addItem(item);
-
-            // ACT & ASSERT
-            assertThatThrownBy(() -> cart.updateQuantity(item, 0))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("Kvantitet måste vara positiv");
-        }
-
-        @Test
-        void shouldThrowExceptionWhenUpdatingToNegativeQuantity() {
-            // ARRANGE
-            Item item = new Item("T-Shirt", BigDecimal.valueOf(150), 1);
-            cart.addItem(item);
-
-            // ACT & ASSERT
-            assertThatThrownBy(() -> cart.updateQuantity(item, -5))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("Kvantitet måste vara positiv");
-        }
-
-        @Test
-        void shouldThrowExceptionWhenApplyingNegativeDiscount() {
-            // ARRANGE
-            BigDecimal negativeDiscount = BigDecimal.valueOf(-10);
-
-            // ACT & ASSERT
-            assertThatThrownBy(() -> cart.applyDiscount(negativeDiscount))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("Rabatt kan inte vara negativ");
-        }
-
-        @Test
-        void shouldThrowExceptionWhenApplyingZeroDiscount() {
-            // ARRANGE
-            BigDecimal zeroDiscount = BigDecimal.ZERO;
-
-            // ACT & ASSERT
-            assertThatThrownBy(() -> cart.applyDiscount(zeroDiscount))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("Rabatt kan inte vara negativ");
-        }
-
-        @Test
-        void shouldThrowExceptionWhenApplyingDiscountOver100Percent() {
-            // ARRANGE
-            BigDecimal over100PercentDiscount = BigDecimal.valueOf(101);
-
-            // ACT & ASSERT
-            assertThatThrownBy(() -> cart.applyDiscount(over100PercentDiscount))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("Rabatt kan inte vara över 100%");
+                    .hasMessageContaining(expectedMessage);
         }
     }
 }
