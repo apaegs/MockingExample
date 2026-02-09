@@ -61,9 +61,9 @@ public class ShoppingCart {
         if (discountPercentage.compareTo(BigDecimal.ZERO) > 0) {
             BigDecimal discount = subtotal.multiply(discountPercentage)
                     .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-            return subtotal.subtract(discount);
+            return subtotal.subtract(discount).setScale(2, RoundingMode.HALF_UP);
         }
 
-        return subtotal;
+        return subtotal.setScale(2, RoundingMode.HALF_UP);
     }
 }
